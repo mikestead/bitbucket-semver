@@ -65,7 +65,17 @@ async function getTagChain(options) {
         if (chain.length !== 1) {
           tag.commit = await getCommit(tag.latestCommit, options);
         }
-        return { base: tag, chain, latest: chain[0] };
+
+        // We attempt to determine if the tag was made on a merged PR commit
+        // If it was we parse out the PR's id. This later allows us to exclude
+        // any pr that was merged at the same time or before it. This can
+        // be more accurate than the timestamp as PR's returned from the RESTful
+        // api do not give is the time the merge commit was made, only when
+        // the PR was merged. There can be a second or two difference there.
+        const match = (tag.commit.message || '')
+          .match(/^merge pull request #(\d+)/i);
+        const taggedPrId = match ? Number(match[1]) : undefined;
+        return { base: tag, chain, latest: chain[0], taggedPrId };
       }
     }
     if (res.isLastPage || res.nextPageStart === undefined) {
@@ -82,18 +92,7 @@ function getTagsPage(start, size, options) {
 
 async function findSemverIncrement(options) {
   const { tags, branch } = options;
-  // There's a small but annoying issue here.
-  // The PR metadata we get from Bitbucket's REST api doesn't
-  // give us the commit hash it makes when a merge executes, only the timestamp of the merge.
-  // This means the timestamp from a tag on a merged PR can be a second before
-  // the PR timestamp. If we don't adjust for this we can end up with PR's
-  // merged at a tag looking like they were merged after.
-  // Here we adjust with a 2 second buffer which in my testing has given
-  // accurate results.
-  // See https://community.atlassian.com/t5/Bitbucket-questions/How-to-find-a-merge-commit-for-the-pull-request-via-Stash-REST/qaq-p/266783
-  const lastTagDate = tags.base
-    ? tags.base.commit.authorTimestamp + 2000
-    : undefined;
+  const lastTagDate = tags.base ? tags.base.commit.authorTimestamp : undefined;
   const prs = await getPullRequests(
     branch,
     'MERGED',
@@ -128,10 +127,27 @@ async function getPullRequests(
   options
 ) {
   const res = await getPullRequestsPage(branch, state, start, size, options);
-  let prs = res.values;
+  let prs = [];
   if (since) {
-    prs = prs.filter(pr => pr.updatedDate > since);
+    for (let pr of res.values) {
+      // There's a small but annoying issue here.
+      // The PR metadata we get from Bitbucket's REST api doesn't give us the
+      // commit hash it makes when a merge executes, only the timestamp of the merge.
+      // This means the timestamp from a tag on a merged PR can be a second or so before
+      // the PR timestamp. To account for this we check both the timestamp and also
+      // the PR id if the last tag was against a PR.
+      // See
+      // - https://community.atlassian.com/t5/Bitbucket-questions/How-to-find-a-merge-commit-for-the-pull-request-via-Stash-REST/qaq-p/266783
+      // - https://community.atlassian.com/t5/Bitbucket-questions/Rest-API-to-get-all-the-merged-commits-in-a-branch/qaq-p/619089#U634812
+      if (pr.id === options.tags.taggedPrId || pr.updatedDate <= since) {
+        break;
+      }
+      prs.push(pr);
+    }
+  } else {
+    prs = res.values;
   }
+
   for (let pr of prs) {
     if (currentDepth < options.depth) {
       pr.children = await getPullRequests(
