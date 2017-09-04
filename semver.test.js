@@ -22,6 +22,11 @@ test('parse semver tag', () => {
   expect(parsed).toEqual(version);
 });
 
+test('parse semver tag with v prefix', () => {
+  const parsed = parseSemver(`v${version.label}`);
+  expect(parsed).toEqual(version);
+});
+
 test('parse semver tag with pre-release', () => {
   const v = copy(version, 'alpha.1.2');
   const parsed = parseSemver(v.label);
@@ -102,13 +107,13 @@ test('increment semver tag with pre-release tag', () => {
     tags: { chain: [] }
   });
   expect(v).toEqual({
-    label: '4.2.4-foo1',
+    label: '4.2.4-foo.1',
     major: 4,
     minor: 2,
     patch: 4,
     tag: {
-      label: '-foo1',
-      pre: 'foo1',
+      label: '-foo.1',
+      pre: 'foo.1',
       meta: ''
     }
   });
@@ -118,17 +123,17 @@ test('increment semver tag with existing pre-release tag', () => {
   const v = incrementVersion(Semver.PATCH, {
     current: version,
     pre: 'foo',
-    tags: { chain: [{ displayId: `4.2.4-foo1` }] }
+    tags: { chain: [{ displayId: `4.2.4-foo.1` }] }
   });
 
   expect(v).toEqual({
-    label: '4.2.4-foo2',
+    label: '4.2.4-foo.2',
     major: 4,
     minor: 2,
     patch: 4,
     tag: {
-      label: '-foo2',
-      pre: 'foo2',
+      label: '-foo.2',
+      pre: 'foo.2',
       meta: ''
     }
   });
@@ -141,13 +146,13 @@ test('increment semver tag with alpha tag', () => {
     tags: { chain: [] }
   });
   expect(v).toEqual({
-    label: '4.2.4-alpha1',
+    label: '4.2.4-alpha.1',
     major: 4,
     minor: 2,
     patch: 4,
     tag: {
-      label: '-alpha1',
-      pre: 'alpha1',
+      label: '-alpha.1',
+      pre: 'alpha.1',
       meta: ''
     }
   });
@@ -157,17 +162,17 @@ test('increment semver tag with existing alpha tag', () => {
   const v = incrementVersion(Semver.PATCH, {
     current: version,
     alpha: true,
-    tags: { chain: [{ displayId: `4.2.4-alpha1` }] }
+    tags: { chain: [{ displayId: `4.2.4-alpha.1` }] }
   });
 
   expect(v).toEqual({
-    label: '4.2.4-alpha2',
+    label: '4.2.4-alpha.2',
     major: 4,
     minor: 2,
     patch: 4,
     tag: {
-      label: '-alpha2',
-      pre: 'alpha2',
+      label: '-alpha.2',
+      pre: 'alpha.2',
       meta: ''
     }
   });
@@ -180,13 +185,13 @@ test('increment semver tag with beta tag', () => {
     tags: { chain: [] }
   });
   expect(v).toEqual({
-    label: '4.2.4-beta1',
+    label: '4.2.4-beta.1',
     major: 4,
     minor: 2,
     patch: 4,
     tag: {
-      label: '-beta1',
-      pre: 'beta1',
+      label: '-beta.1',
+      pre: 'beta.1',
       meta: ''
     }
   });
@@ -196,17 +201,17 @@ test('increment semver tag with existing beta tag', () => {
   const v = incrementVersion(Semver.PATCH, {
     current: version,
     beta: true,
-    tags: { chain: [{ displayId: `4.2.4-beta1` }] }
+    tags: { chain: [{ displayId: `4.2.4-beta.1` }] }
   });
 
   expect(v).toEqual({
-    label: '4.2.4-beta2',
+    label: '4.2.4-beta.2',
     major: 4,
     minor: 2,
     patch: 4,
     tag: {
-      label: '-beta2',
-      pre: 'beta2',
+      label: '-beta.2',
+      pre: 'beta.2',
       meta: ''
     }
   });
@@ -238,13 +243,13 @@ test('increment semver tag with pre and meta tag', () => {
     tags: { chain: [] }
   });
   expect(v).toEqual({
-    label: '4.2.4-alpha1+44453',
+    label: '4.2.4-alpha.1+44453',
     major: 4,
     minor: 2,
     patch: 4,
     tag: {
-      label: '-alpha1+44453',
-      pre: 'alpha1',
+      label: '-alpha.1+44453',
+      pre: 'alpha.1',
       meta: '44453'
     }
   });
@@ -252,11 +257,11 @@ test('increment semver tag with pre and meta tag', () => {
 
 test('find major semver increment', () => {
   const prs = [
-    { title: 'Add: 1' },
-    { title: 'Fix: 2' },
+    { title: 'Minor: 1' },
+    { title: 'Patch: 2' },
     { title: 'Doc: 3' },
-    { title: 'Break: 4' },
-    { title: 'Fix: 5' }
+    { title: 'Major: 4' },
+    { title: 'Patch: 5' }
   ];
   const inc = getSemverIncrement(prs);
   expect(inc).toBe(Semver.MAJOR);
@@ -264,31 +269,31 @@ test('find major semver increment', () => {
 
 test('find minor semver increment', () => {
   const prs = [
-    { title: 'Add: 1' },
-    { title: 'Fix: 2' },
+    { title: 'Minor: 1' },
+    { title: 'Patch: 2' },
     { title: 'Doc: 3' },
-    { title: 'Fix: 4' }
+    { title: 'Patch: 4' }
   ];
   const inc = getSemverIncrement(prs);
   expect(inc).toBe(Semver.MINOR);
 });
 
 test('find patch semver increment', () => {
-  const prs = [{ title: 'Fix: 1' }, { title: 'Doc: 2' }];
+  const prs = [{ title: 'Patch: 1' }, { title: 'Doc: 2' }];
   const inc = getSemverIncrement(prs);
   expect(inc).toBe(Semver.PATCH);
 });
 
 test('find unknown semver increment when only doc changes', () => {
-  const prs = [{ title: 'Doc: 1' }, { title: 'Doc: 2' }];
+  const prs = [{ title: 'Doc: 1' }, { title: 'Upkeep: 2' }];
   const inc = getSemverIncrement(prs);
   expect(inc).toBe(Semver.UNKNOWN);
 });
 
 test('fail with invalid pr title', () => {
-  const prs = [{ title: 'Fix: 1' }, { title: '2' }];
+  const prs = [{ title: 'Patch: 1' }, { id: 4, title: 'Missing semver title' }];
   expect(() => getSemverIncrement(prs)).toThrow(
-    'Invalid pull request title: 2'
+    'Pull request title did not contain a valid Semver label: #4 Missing semver title'
   );
 });
 

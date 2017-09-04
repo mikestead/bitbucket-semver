@@ -34,11 +34,11 @@ program
     String,
     'master'
   )
-  .option(
-    '-c, --current [version]',
-    'current semver version. If undefined will be searched for in tag history.',
-    String
-  )
+  // .option(
+  //   '-c, --current [version]',
+  //   'current semver version. If undefined will be searched for in tag history.',
+  //   String
+  // )
   .option('--alpha', 'add an alpha pre-release tag', String)
   .option('--beta', 'add a beta pre-release tag', String)
   .option(

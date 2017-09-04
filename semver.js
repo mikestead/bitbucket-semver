@@ -1,20 +1,24 @@
-const SEMVER_TAG_PATTERN = /^(\d+)\.(\d+)\.(\d+)([-+](.+))?$/;
-const TITLE_PATTERN = /^(major|minor|patch|break|add|fix|doc):?\s.+$/i;
+// semver tag without pre-release but with or without metadata
+const SEMVER_TAG_BASE_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)(\+.+)?$/;
+// semver tag with or without pre-release and/or metadata
+const SEMVER_TAG_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)([-+](.+))?$/;
+const TITLE_PATTERN = /^(major|minor|patch|upkeep|doc):?\s.+$/i;
 
 const Semver = {
   MAJOR: 1,
-  BREAK: 1,
   MINOR: 2,
-  ADD: 2,
   PATCH: 3,
-  FIX: 3,
-  DOC: 40, // support but ignore benign PRs with only documentation changes
+  DOC: 40, // support but ignore benign PRs
+  UPKEEP: 40, // support but ignore benign PRs
   UNKNOWN: 40
 };
 
 function parseSemver(version) {
   const match = version.match(SEMVER_TAG_PATTERN);
   if (!match) throw new Error(`Invalid semver version: ${version}`);
+  const major = Number(match[1]);
+  const minor = Number(match[2]);
+  const patch = Number(match[3]);
   const tag = match[4] || '';
   const i = tag.indexOf('-');
   const j = tag.indexOf('+');
@@ -22,10 +26,10 @@ function parseSemver(version) {
   const meta = ~j ? tag.slice(j + 1) : '';
 
   return {
-    label: version,
-    major: Number(match[1]),
-    minor: Number(match[2]),
-    patch: Number(match[3]),
+    label: `${major}.${minor}.${patch}${tag}`,
+    major,
+    minor,
+    patch,
     tag: {
       label: tag,
       pre,
@@ -45,17 +49,16 @@ function getSemverIncrement(prs) {
         result = weight;
       }
     } else {
-      throw new Error(`Invalid pull request title: ${pr.title}`);
+      throw new Error(
+        `Pull request title did not contain a valid Semver label: #${pr.id} ${pr.title}`
+      );
     }
   }
   return result;
 }
 
 function incrementVersion(inc, options) {
-  // const label = options.tags.base ? options.tags.base.displayId : '1.0.0';
-  // options.current = parseSemver(label);
   const updated = Object.assign({}, options.current);
-
   updated.tag = { label: '', pre: '', meta: '' };
   if (inc === Semver.MAJOR) {
     if (updated.major > 0) {
@@ -88,7 +91,7 @@ function incrementVersion(inc, options) {
 
 function updatePreRelease(updated, type, options) {
   const lastPre = findLatestPreRelease(updated.label, type, options);
-  const pre = lastPre ? `${type}${lastPre.index + 1}` : `${type}1`;
+  const pre = lastPre ? `${type}.${lastPre.index + 1}` : `${type}.1`;
   updated.tag.pre = pre;
   updated.tag.label = `-${pre}`;
   updated.label += updated.tag.label;
@@ -97,7 +100,7 @@ function updatePreRelease(updated, type, options) {
 
 function findLatestPreRelease(label, tag, options) {
   const { chain } = options.tags;
-  const pattern = new RegExp(`^${label}-${tag}(\\d+)$`);
+  const pattern = new RegExp(`^${label}-${tag}\\.(\\d+)$`);
   const pre = `${label}-${tag}`;
   for (let tag of chain) {
     const match = tag.displayId.match(pattern);
@@ -111,6 +114,7 @@ function findLatestPreRelease(label, tag, options) {
   return undefined;
 }
 
+exports.SEMVER_TAG_BASE_PATTERN = SEMVER_TAG_BASE_PATTERN;
 exports.SEMVER_TAG_PATTERN = SEMVER_TAG_PATTERN;
 exports.Semver = Semver;
 exports.parseSemver = parseSemver;

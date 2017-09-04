@@ -3,6 +3,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const {
+  SEMVER_TAG_BASE_PATTERN,
   SEMVER_TAG_PATTERN,
   Semver,
   parseSemver,
@@ -30,7 +31,7 @@ async function verifyOptions(options) {
   assert.ok(options.password, 'Bitbucket password is missing');
 
   if (!options.branch) options.branch = 'master';
-  if (options.branch.indexOf('/') === -1) {
+  if (!options.branch.startsWith('refs/')) {
     options.branch = `refs/heads/${options.branch}`;
   }
 
@@ -45,7 +46,6 @@ async function verifyOptions(options) {
 }
 
 async function getTagChain(options) {
-  const SEMVER_BASE = /^(\d+)\.(\d+)\.(\d+)$/; // for now assume no metadata
   const size = 20;
   let start = 0;
   const chain = [];
@@ -59,11 +59,11 @@ async function getTagChain(options) {
       }
       chain.push(tag);
       if (chain.length === 1) {
-        tag.commit = await getCommit(tag.hash || tag.latestCommit, options);
+        tag.commit = await getCommit(tag.latestCommit, options);
       }
-      if (SEMVER_BASE.test(tag.displayId || '')) {
+      if (SEMVER_TAG_BASE_PATTERN.test(tag.displayId || '')) {
         if (chain.length !== 1) {
-          tag.commit = await getCommit(tag.hash || tag.latestCommit, options);
+          tag.commit = await getCommit(tag.latestCommit, options);
         }
         return { base: tag, chain, latest: chain[0] };
       }
@@ -82,7 +82,18 @@ function getTagsPage(start, size, options) {
 
 async function findSemverIncrement(options) {
   const { tags, branch } = options;
-  const lastTagDate = tags.base ? tags.base.commit.authorTimestamp : undefined;
+  // There's a small but annoying issue here.
+  // The PR metadata we get from Bitbucket's REST api doesn't
+  // give us the commit hash it makes when a merge executes, only the timestamp of the merge.
+  // This means the timestamp from a tag on a merged PR can be a second before
+  // the PR timestamp. If we don't adjust for this we can end up with PR's
+  // merged at a tag looking like they were merged after.
+  // Here we adjust with a 2 second buffer which in my testing has given
+  // accurate results.
+  // See https://community.atlassian.com/t5/Bitbucket-questions/How-to-find-a-merge-commit-for-the-pull-request-via-Stash-REST/qaq-p/266783
+  const lastTagDate = tags.base
+    ? tags.base.commit.authorTimestamp + 2000
+    : undefined;
   const prs = await getPullRequests(
     branch,
     'MERGED',
