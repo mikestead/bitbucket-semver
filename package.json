@@ -1,0 +1,30 @@
+{
+  "name": "bitbucket-semver",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "bitbucket-semver": "run.js"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "precommit": "lint-staged"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "chalk": "^2.1.0",
+    "commander": "^2.11.0"
+  },
+  "devDependencies": {
+    "husky": "^0.14.3",
+    "jest": "^20.0.4",
+    "lint-staged": "^4.0.3",
+    "prettier": "^1.5.3"
+  },
+  "lint-staged": {
+    "*.js": ["prettier --single-quote --write", "git add"]
+  }
+}
