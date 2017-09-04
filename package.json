@@ -1,6 +1,6 @@
 {
   "name": "bitbucket-semver",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A tool to determine the next Semver version of a repository based on merged pull requests.",
   "main": "index.js",
   "bin": {
