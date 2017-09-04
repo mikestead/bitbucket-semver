@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "bitbucket-semver": "run.js"
+    "bbsemver": "run.js"
   },
   "scripts": {
     "test": "jest",
