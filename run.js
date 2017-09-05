@@ -34,13 +34,13 @@ program
     String,
     'master'
   )
-  // .option(
-  //   '-c, --current [version]',
-  //   'current semver version. If undefined will be searched for in tag history.',
-  //   String
-  // )
-  .option('--alpha', 'add an alpha pre-release tag', String)
-  .option('--beta', 'add a beta pre-release tag', String)
+  .option(
+    '-c, --current [version]',
+    'current semver version. If undefined will be searched for in tag history.',
+    String
+  )
+  .option('--alpha', 'add an alpha pre-release tag')
+  .option('--beta', 'add a beta pre-release tag')
   .option(
     '--pre [tag]',
     'pre-release tag to add to incremented version',
@@ -49,10 +49,9 @@ program
   .option('--meta [tag]', 'metadata tag to add to incremented version', String)
   .option(
     '--json',
-    'output incremented version in json format instead of plain text',
-    String,
-    'plain'
+    'output incremented version in json format instead of plain text'
   )
+  .option('--dev', 'maintain a semver major of zero during initial development')
   .option(
     '-d, --depth [int]',
     'depth of child pull requests to walk. Defaults to 1 which inspects PRs merged into the root branch only',
@@ -64,9 +63,9 @@ program
 
 execute(program).then(result => complete(result), e => error(e));
 
-function complete({ current, next }) {
+function complete({ current, next, isFirstTag }) {
   let str = '';
-  if (current.label === next.label) {
+  if (current.label === next.label && !isFirstTag) {
     // if there's no version change output `unchanged`
     // to allow tools to handle this gracefully.
     if (program.verbose) console.info('no semver increment found');

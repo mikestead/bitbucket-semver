@@ -2,7 +2,8 @@ const {
   Semver,
   parseSemver,
   incrementVersion,
-  getSemverIncrement
+  getSemverIncrement,
+  sortSemver
 } = require('./semver');
 
 const version = {
@@ -295,6 +296,56 @@ test('fail with invalid pr title', () => {
   expect(() => getSemverIncrement(prs)).toThrow(
     'Pull request title did not contain a valid Semver label: #4 Missing semver title'
   );
+});
+
+test('sort versions by semver highest to lowest', () => {
+  const v1 = [
+    {
+      major: 1,
+      minor: 10,
+      patch: 1
+    },
+    {
+      major: 1,
+      minor: 12,
+      patch: 0
+    },
+    {
+      major: 1,
+      minor: 9,
+      patch: 0
+    },
+    {
+      major: 1,
+      minor: 12,
+      patch: 1
+    }
+  ];
+  const v2 = sortSemver(v1);
+  const v3 = [
+    {
+      major: 1,
+      minor: 12,
+      patch: 1
+    },
+    {
+      major: 1,
+      minor: 12,
+      patch: 0
+    },
+    {
+      major: 1,
+      minor: 10,
+      patch: 1
+    },
+    {
+      major: 1,
+      minor: 9,
+      patch: 0
+    }
+  ];
+
+  expect(v2).toEqual(v3);
 });
 
 function copy(v, pre, meta) {

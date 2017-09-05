@@ -8,19 +8,25 @@ const {
   Semver,
   parseSemver,
   getSemverIncrement,
-  incrementVersion
+  incrementVersion,
+  sortSemver
 } = require('./semver');
 
-const TARGET = {
-  NODE: 'nodejs'
-};
+// If no semver base tag is provided then we search this many
+// base tags for the highest found. Usually the first found will
+// be the highest but we want to be extra sure we base things correctly.
+const MAX_BASE_SEMVER_TAG_SEARCH = 5;
 
 module.exports = execute;
 async function execute(options) {
   options = await verifyOptions(options);
   const inc = await findSemverIncrement(options);
   const next = incrementVersion(inc, options);
-  return { current: options.current, next };
+  return {
+    current: options.current,
+    next,
+    isFirstTag: options.tags.chain.length === 0
+  };
 }
 
 async function verifyOptions(options) {
@@ -39,6 +45,16 @@ async function verifyOptions(options) {
 
   options.tags = await getTagChain(options);
 
+  const { base } = options.tags;
+  if (base && base.semver) {
+    if (base.semver.major > 0 && options.dev) {
+      throw new Error(
+        `Semver major of 0 is only permitted during initial development. Current version is "${base
+          .semver.label}".`
+      );
+    }
+  }
+
   const label = options.tags.base ? options.tags.base.displayId : '0.0.0';
   options.current = parseSemver(label);
 
@@ -46,44 +62,63 @@ async function verifyOptions(options) {
 }
 
 async function getTagChain(options) {
-  const size = 20;
+  const allTags = [];
   let start = 0;
-  const chain = [];
-  while (true) {
-    const res = await getTagsPage(start, size, options);
-    const tags = res.values || [];
-    for (const tag of tags) {
-      // ignore non-semver tags
-      if (!SEMVER_TAG_PATTERN.test(tag.displayId)) {
-        continue;
-      }
-      chain.push(tag);
-      if (chain.length === 1) {
-        tag.commit = await getCommit(tag.latestCommit, options);
-      }
+  let bases = [];
+  let res;
+  do {
+    res = await getTagsPage(start, 20, options);
+    // filter out any tags which aren't semver
+    const tags = res.values.filter(tag =>
+      SEMVER_TAG_PATTERN.test(tag.displayId)
+    );
+    for (let i = 0; i < tags.length; i++) {
+      const tag = tags[i];
+      allTags.push(tag);
       if (SEMVER_TAG_BASE_PATTERN.test(tag.displayId || '')) {
-        if (chain.length !== 1) {
-          tag.commit = await getCommit(tag.latestCommit, options);
+        bases.push({ tag, i: allTags.length - 1 + i });
+        if (
+          bases.length > MAX_BASE_SEMVER_TAG_SEARCH ||
+          (options.current && options.current === tag.displayId)
+        ) {
+          break;
         }
-
-        // We attempt to determine if the tag was made on a merged PR commit
-        // If it was we parse out the PR's id. This later allows us to exclude
-        // any pr that was merged at the same time or before it. This can
-        // be more accurate than the timestamp as PR's returned from the RESTful
-        // api do not give is the time the merge commit was made, only when
-        // the PR was merged. There can be a second or two difference there.
-        const match = (tag.commit.message || '')
-          .match(/^merge pull request #(\d+)/i);
-        const taggedPrId = match ? Number(match[1]) : undefined;
-        return { base: tag, chain, latest: chain[0], taggedPrId };
       }
-    }
-    if (res.isLastPage || res.nextPageStart === undefined) {
-      return { chain, latest: chain[0] };
     }
     start = res.nextPageStart;
+  } while (!res.isLastPage && bases.length < MAX_BASE_SEMVER_TAG_SEARCH);
+
+  const versions = bases.map((base, i) => {
+    const version = parseSemver(base.tag.displayId);
+    version.index = i;
+    return version;
+  });
+
+  const highestBase = sortSemver(versions)[0];
+  if (highestBase) {
+    const chain = allTags.slice(0, highestBase.index + 1);
+    let tag = chain[0];
+    tag.commit = await getCommit(tag.latestCommit, options);
+    tag.semver = parseSemver(tag.displayId);
+    tag = chain[chain.length - 1];
+    if (!tag.commit) {
+      tag.commit = await getCommit(tag.latestCommit, options);
+      tag.semver = parseSemver(tag.displayId);
+    }
+    // We attempt to determine if the tag was made on a merged PR commit
+    // If it was we parse out the PR's id. This later allows us to exclude
+    // any pr that was merged at the same time or before it. This can
+    // be more accurate than the timestamp as PR's returned from the RESTful
+    // api do not give is the time the merge commit was made, only when
+    // the PR was merged. There can be a second or two difference there.
+    const match = (tag.commit.message || '')
+      .match(/^merge pull request #(\d+)/i);
+    const taggedPrId = match ? Number(match[1]) : undefined;
+
+    return { base: tag, chain, latest: chain[0], taggedPrId };
   }
-  return undefined;
+
+  return { chain: allTags, latest: allTags[0] };
 }
 
 function getTagsPage(start, size, options) {

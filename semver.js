@@ -61,7 +61,7 @@ function incrementVersion(inc, options) {
   const updated = Object.assign({}, options.current);
   updated.tag = { label: '', pre: '', meta: '' };
   if (inc === Semver.MAJOR) {
-    if (updated.major > 0) {
+    if (updated.major > 0 || !options.dev) {
       updated.major++;
       updated.minor = 0;
       updated.patch = 0;
@@ -114,9 +114,24 @@ function findLatestPreRelease(label, tag, options) {
   return undefined;
 }
 
+// sorts highest to lowest
+function sortSemver(versions) {
+  let diff;
+  return versions.sort((a, b) => {
+    if ((diff = b.major - a.major)) return diff;
+    if ((diff = b.minor - a.minor)) return diff;
+    if ((diff = b.patch - a.patch)) return diff;
+    if (a.tag && b.tag) {
+      return (b.tag.label || '').localeCompare(a.tag.label || '');
+    }
+    return 0;
+  });
+}
+
 exports.SEMVER_TAG_BASE_PATTERN = SEMVER_TAG_BASE_PATTERN;
 exports.SEMVER_TAG_PATTERN = SEMVER_TAG_PATTERN;
 exports.Semver = Semver;
 exports.parseSemver = parseSemver;
 exports.getSemverIncrement = getSemverIncrement;
 exports.incrementVersion = incrementVersion;
+exports.sortSemver = sortSemver;
