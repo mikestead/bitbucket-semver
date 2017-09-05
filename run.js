@@ -41,16 +41,9 @@ program
   )
   .option('--alpha', 'add an alpha pre-release tag')
   .option('--beta', 'add a beta pre-release tag')
-  .option(
-    '--pre [tag]',
-    'pre-release tag to add to incremented version',
-    String
-  )
-  .option('--meta [tag]', 'metadata tag to add to incremented version', String)
-  .option(
-    '--json',
-    'output incremented version in json format instead of plain text'
-  )
+  .option('--pre [tag]', 'add a custom pre-release tag', String)
+  .option('--meta [tag]', 'add a metadata tag', String)
+  .option('--json', 'output incremented version in json format')
   .option('--dev', 'maintain a semver major of zero during initial development')
   .option(
     '-d, --depth [int]',
