@@ -1,7 +1,4 @@
 const request = require('axios');
-const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
 const {
   SEMVER_TAG_BASE_PATTERN,
   SEMVER_TAG_PATTERN,
@@ -32,9 +29,17 @@ async function execute(options) {
 async function verifyOptions(options) {
   options = options || {};
 
-  assert.ok(options.url, 'Bitbucket base url is missing');
-  assert.ok(options.username, 'Bitbucket username is missing');
-  assert.ok(options.password, 'Bitbucket password is missing');
+  if (typeof process !== 'undefined' && process.env) {
+    const env = process.env;
+    if (!options.url) options.url = env.BITBUCKET_PROJECT_URL;
+    if (!options.username) options.username = env.BITBUCKET_USER;
+    if (!options.password) {
+      options.password = env.BITBUCKET_PASSWORD || env.BITBUCKET_PSWD;
+    }
+  }
+  assert(options.url, 'Bitbucket base url is missing');
+  assert(options.username, 'Bitbucket username is missing');
+  assert(options.password, 'Bitbucket password is missing');
 
   if (!options.branch) options.branch = 'master';
   if (!options.branch.startsWith('refs/')) {
@@ -258,4 +263,8 @@ function printTree(prs, indent = 0, options) {
 
 function print(msg, options) {
   if (options.verbose) process.stdout.write(`${msg}\n`);
+}
+
+function assert(truth, message) {
+  if (!truth) throw new Error(message);
 }

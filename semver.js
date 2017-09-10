@@ -78,6 +78,7 @@ function incrementVersion(inc, options) {
   updated.label = `${updated.major}.${updated.minor}.${updated.patch}`;
 
   if (options.pre) updatePreRelease(updated, options.pre, options);
+  else if (options.rc) updatePreRelease(updated, 'rc', options);
   else if (options.beta) updatePreRelease(updated, 'beta', options);
   else if (options.alpha) updatePreRelease(updated, 'alpha', options);
 

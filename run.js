@@ -12,7 +12,7 @@ program
   .version(require('./package.json').version)
   .option(
     '--url [url]',
-    'butbucket project url e.g. https://bitbucket.company.com/projects/foo/repos/bar',
+    'bitbucket project url e.g. https://bitbucket.company.com/projects/foo/repos/bar',
     String,
     env.BITBUCKET_PROJECT_URL
   )
@@ -36,11 +36,12 @@ program
   )
   .option(
     '-c, --current [version]',
-    'current semver version. If undefined will be searched for in tag history.',
+    'current base semver version. If undefined will be searched for in tag history.',
     String
   )
   .option('--alpha', 'add an alpha pre-release tag')
   .option('--beta', 'add a beta pre-release tag')
+  .option('--rc', 'add a release candidate (rc) pre-release tag')
   .option('--pre [tag]', 'add a custom pre-release tag', String)
   .option('--meta [tag]', 'add a metadata tag', String)
   .option('--json', 'output incremented version in json format')
