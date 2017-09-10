@@ -1,5 +1,7 @@
 # Bitbucket Semver
 
+![travis](https://travis-ci.org/mikestead/bitbucket-semver.svg?branch=master)
+
 A tool for [Bitbucket Server](https://www.atlassian.com/software/bitbucket/server) to automatically determine the next [Semver](http://semver.org/) version of a repository based on merged pull requests.
 
 Best when used together with the [Semver Pull Request Checker Plugin](https://marketplace.atlassian.com/plugins/mikestead.bitbucket.bitbucket-semver/server/overview) to enforce Semver labels on all pull requests.
