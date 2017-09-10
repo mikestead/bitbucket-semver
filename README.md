@@ -179,7 +179,7 @@ const bbsemver = require('bitbucket-semver')
 bbsemver({
   url: 'https://bitbucket.company.com/projects/foo/repos/bar',
   username: 'bitbucket-username',
-  password: 'bitbucket-password
+  password: 'bitbucket-password'
 })
 .then({ current, next, isFirstTag } => {
   console.log(current, next, isFirstTay)
