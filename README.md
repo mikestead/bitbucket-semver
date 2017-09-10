@@ -182,7 +182,7 @@ bbsemver({
   password: 'bitbucket-password'
 })
 .then({ current, next, isFirstTag } => {
-  console.log(current, next, isFirstTay)
+  console.log(current, next, isFirstTag)
 })
 .catch(error => {
   console.error(error)
