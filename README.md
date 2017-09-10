@@ -73,15 +73,15 @@ For each merged PR title it looks for one of the following keyword prefixes.
 - `Patch`: Backwards compatible fix
 - `Upkeep`: General housekeeping which doesn't require a release e.g. improved tests or documentation.
 
-**If any merged PR is discovered without a semver prefix in the title then the the tool will exit with code `1` printing the offending PR title.**
+**If any merged PR is discovered without a semver title prefix then the tool will exit with code `1` printing the offending PR title.**
 
-Note that we'd prefer to look for semver labels on a PR but these are [still unsupported](https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb#). 
+Note that we'd prefer to look for semver _labels_ on a PR but these are [still unsupported](https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb#). 
 
 Scanning of pull requests will go one level deep unless a custom depth is specified via the `--depth [depth]` option. This means that any PR merged directly to `master` will be examined but any PR merged to another branch which then merged to master won't.
 
-The reason for this default is ensure high accuracy. For example a PR may have been opened and merged to another branch months previously with a `major` semver tag. If the branch it merged into only just made its way to master but in that time the `major` it referred to has already gone in via another PR then we'd end up with an invalid `major` bump. This issue is exacerbated by the inability to edit the metadata of a merged PR in Bitbucket Server.
+The reason for this default is to ensure high accuracy. For example a `major` PR may have been opened and merged to another branch months previously. If the branch it merged into only just made its way to master but in that time the `major` it referred to has already gone in via another PR then we'd end up with an invalid `major` bump. This issue is exacerbated by the inability to edit the metadata of a merged PR in Bitbucket Server.
 
-You may feel this is unduly cautious setting so are free to define your own more liberal scanning depth.
+You may feel this is an unduly cautious setting so are free to define your own more liberal scanning depth. Remember though that the semver tag on a PR going into `master` should reflect any PR's which have merged into it.
 
 Here are some examples of generated version increments based on merged PRs.
 
@@ -107,14 +107,14 @@ Here are some examples of generated version increments based on merged PRs.
 
 #### Pre-release
 
-A pre-release can be generated via one of a the following options.
+A pre-release can be generated via one of the following options.
 
 - `--alpha`
 - `--beta`
 - `--rc`
 - `--pre [tag]`
 
-The first three will add their respective pre-release tag to the base version, the last allowing for a custom tag.
+The first three will add their respective pre-release tag to the base version, the last allows for a custom tag.
 
 For any of these options a count will also be added to the tag. This will auto increment if the same pre-release is applied to the same calculated version.
 
