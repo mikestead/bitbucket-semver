@@ -1,6 +1,6 @@
 # Bitbucket Semver
 
-![travis](https://travis-ci.org/mikestead/bitbucket-semver.svg?branch=master)
+[![Build Status](https://travis-ci.org/mikestead/bitbucket-semver.svg?branch=master)](https://travis-ci.org/mikestead/bitbucket-semver)
 
 A tool for [Bitbucket Server](https://www.atlassian.com/software/bitbucket/server) to automatically determine the next [Semver](http://semver.org/) version of a repository based on merged pull requests.
 
