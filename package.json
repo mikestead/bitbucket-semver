@@ -1,6 +1,6 @@
 {
   "name": "bitbucket-semver",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A Bitbucket Server tool to determine the next Semver version of a repository based on merged pull requests.",
   "main": "index.js",
   "license": "MIT",
@@ -47,6 +47,9 @@
     "prettier": "^1.5.3"
   },
   "lint-staged": {
-    "*.js": ["prettier --single-quote --write", "git add"]
+    "*.js": [
+      "prettier --single-quote --write",
+      "git add"
+    ]
   }
 }
