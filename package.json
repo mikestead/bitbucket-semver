@@ -3,6 +3,7 @@
   "version": "1.1.0",
   "description": "A tool to determine the next Semver version of a repository based on merged pull requests.",
   "main": "index.js",
+  "license": "MIT",
   "bin": {
     "bbsemver": "run.js"
   },
@@ -25,9 +26,6 @@
     "prettier": "^1.5.3"
   },
   "lint-staged": {
-    "*.js": [
-      "prettier --single-quote --write",
-      "git add"
-    ]
+    "*.js": ["prettier --single-quote --write", "git add"]
   }
 }
