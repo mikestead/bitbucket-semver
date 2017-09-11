@@ -1,9 +1,32 @@
 {
   "name": "bitbucket-semver",
   "version": "1.1.0",
-  "description": "A tool to determine the next Semver version of a repository based on merged pull requests.",
+  "description": "A Bitbucket Server tool to determine the next Semver version of a repository based on merged pull requests.",
   "main": "index.js",
   "license": "MIT",
+  "author": {
+    "name": "Mike Stead",
+    "url": "https://github.com/mikestead"
+  },
+  "homepage": "https://github.com/mikestead/bitbucket-semver",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikestead/bitbucket-semver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mikestead/bitbucket-semver/issues"
+  },
+  "engines": {
+    "node": ">=7.6.0"
+  },
+  "keywords": [
+    "semver",
+    "versioning",
+    "bitbucket",
+    "bitbucket-server",
+    "ci",
+    "cd"
+  ],
   "bin": {
     "bbsemver": "run.js"
   },
@@ -12,8 +35,6 @@
     "test:watch": "jest --watch",
     "precommit": "lint-staged"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "axios": "^0.16.2",
     "chalk": "^2.1.0",
