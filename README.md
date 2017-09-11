@@ -16,7 +16,7 @@ or npm
 
     npm install bitbucket-semver --global
 
-*You must be running Node v7.3+*
+*You must be running Node v7.6+*
 
 ### Usage
 
