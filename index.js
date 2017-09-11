@@ -256,7 +256,7 @@ function serviceCall(url, options) {
 function printTree(prs, indent = 0, options) {
   if (!prs || !options.verbose) return;
   for (let pr of prs) {
-    print('    '.repeat(indent) + pr.title, options);
+    print('    '.repeat(indent) + `#${pr.id} ${pr.title}`, options);
     printTree(pr.children, indent + 1, options);
   }
 }
