@@ -247,3 +247,9 @@ depth: number
  */
 verbose: boolean
 ```
+
+### Docker
+
+The tool is also available as a [Docker image](https://hub.docker.com/r/stead/bitbucket-semver). 
+
+    docker run --rm stead/bitbucket-semver --help
