@@ -55,6 +55,12 @@ fi
 npm version $semverVersion
 ```
 
+#### Docker
+
+The tool is also available as a [Docker image](https://hub.docker.com/r/stead/bitbucket-semver). 
+
+    docker run --rm stead/bitbucket-semver --help
+
 ### Versioning
 
 Bitbucket Semver works based on the previous highest *non pre-release* tag of your repository. We'll call this a *base* tag.
@@ -247,9 +253,3 @@ depth: number
  */
 verbose: boolean
 ```
-
-### Docker
-
-The tool is also available as a [Docker image](https://hub.docker.com/r/stead/bitbucket-semver). 
-
-    docker run --rm stead/bitbucket-semver --help
