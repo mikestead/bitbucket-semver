@@ -74,9 +74,8 @@ async function getTagChain(options) {
   do {
     res = await getTagsPage(start, 20, options);
     // filter out any tags which aren't semver
-    const tags = res.values.filter(tag =>
-      SEMVER_TAG_PATTERN.test(tag.displayId)
-    );
+    const tags = (res.values || [])
+      .filter(tag => SEMVER_TAG_PATTERN.test(tag.displayId));
     for (let i = 0; i < tags.length; i++) {
       const tag = tags[i];
       allTags.push(tag);
