@@ -2,7 +2,7 @@
 const SEMVER_TAG_BASE_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)(\+.+)?$/;
 // semver tag with or without pre-release and/or metadata
 const SEMVER_TAG_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)([-+](.+))?$/;
-const TITLE_PATTERN = /^(major|minor|patch|upkeep|doc):?\s.+$/i;
+const TITLE_PATTERN = /^(major|minor|patch|upkeep|doc)[:\s].+$/i;
 
 const Semver = {
   MAJOR: 1,
