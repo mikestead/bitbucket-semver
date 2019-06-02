@@ -1,4 +1,4 @@
-const request = require('axios');
+const request = require('request-promise');
 const {
   SEMVER_TAG_BASE_PATTERN,
   SEMVER_TAG_PATTERN,
@@ -54,8 +54,9 @@ async function verifyOptions(options) {
   if (base && base.semver) {
     if (base.semver.major > 0 && options.dev) {
       throw new Error(
-        `Semver major of 0 is only permitted during initial development. Current version is "${base
-          .semver.label}".`
+        `Semver major of 0 is only permitted during initial development. Current version is "${
+          base.semver.label
+        }".`
       );
     }
   }
@@ -74,8 +75,9 @@ async function getTagChain(options) {
   do {
     res = await getTagsPage(start, 20, options);
     // filter out any tags which aren't semver
-    const tags = (res.values || [])
-      .filter(tag => SEMVER_TAG_PATTERN.test(tag.displayId));
+    const tags = (res.values || []).filter(tag =>
+      SEMVER_TAG_PATTERN.test(tag.displayId)
+    );
     for (let i = 0; i < tags.length; i++) {
       const tag = tags[i];
       allTags.push(tag);
@@ -115,8 +117,9 @@ async function getTagChain(options) {
     // be more accurate than the timestamp as PR's returned from the RESTful
     // api do not give is the time the merge commit was made, only when
     // the PR was merged. There can be a second or two difference there.
-    const match = (tag.commit.message || '')
-      .match(/^merge pull request #(\d+)/i);
+    const match = (tag.commit.message || '').match(
+      /^merge pull request #(\d+)/i
+    );
     const taggedPrId = match ? Number(match[1]) : undefined;
 
     return { base: tag, chain, latest: chain[0], taggedPrId };
@@ -249,7 +252,7 @@ function serviceCall(url, options) {
       password: options.password
     },
     responseType: 'json'
-  }).then(res => res.data);
+  }).then(data => JSON.parse(data));
 }
 
 function printTree(prs, indent = 0, options) {
