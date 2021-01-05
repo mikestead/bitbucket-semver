@@ -36,7 +36,7 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
-    "axios": "^0.16.2",
+    "axios": "^0.21.1",
     "chalk": "^2.1.0",
     "commander": "^2.11.0"
   },
